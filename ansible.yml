@@ -1,0 +1,36 @@
+---
+# setup vagrant machine for development
+
+- hosts: all
+  remote_user: vagrant
+  become: true
+  become_user: root
+  become_method: sudo
+  tasks:
+    - name: make sure node ppa is available
+      apt_repository: repo='ppa:chris-lea/node.js'
+
+    - name: update apt-cache if needed
+      apt: update_cache=yes
+
+    - name: make sure nodejs is installed
+      apt: name=nodejs state=present
+
+    # use npm module when this issue is resolved:
+    # https://github.com/ansible/ansible-modules-extras/issues/137
+    - name: make sure the latest npm is installed
+      command: npm install -g npm
+
+    - name: make sure git is installed
+      apt: name=git state=present
+
+    - name: make sure nginx is installed
+      apt: name=nginx state=present
+
+    - name: make sure postgresql is installed
+      apt: name=postgresql state=present
+      environment:
+        LC_ALL: en_US.UTF-8
+
+    - name: make sure postgresql contrib extensions are installed
+      apt: name=postgresql-contrib state=present
