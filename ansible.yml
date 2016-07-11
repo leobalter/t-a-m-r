@@ -13,6 +13,9 @@
     - name: update apt-cache if needed
       apt: update_cache=yes
 
+    - name: make sure git is installed
+      apt: name=git state=present
+
     - name: make sure nodejs is installed
       apt: name=nodejs state=present
 
@@ -21,16 +24,37 @@
     - name: make sure the latest npm is installed
       command: npm install -g npm
 
-    - name: make sure git is installed
-      apt: name=git state=present
+    - name: install npm's n
+      npm:
+        name: n
+        global: yes
 
-    - name: make sure nginx is installed
-      apt: name=nginx state=present
+    # ppa:chris-lea installs Node 0.10.x
+    - name: use latest node version using n
+      command: n latest
 
-    - name: make sure postgresql is installed
-      apt: name=postgresql state=present
-      environment:
-        LC_ALL: en_US.UTF-8
+    - name: install test262-harness globally
+      npm:
+        name: test262-harness
+        global: yes
 
-    - name: make sure postgresql contrib extensions are installed
-      apt: name=postgresql-contrib state=present
+    - name: test262 files
+      git:
+        repo: https://github.com/tc39/test262.git
+        dest: /srv/test262/
+
+    - name: run tests
+      command: test262-harness test/built-ins
+      args:
+        chdir: /srv/test262/
+
+    # - name: make sure nginx is installed
+    #   apt: name=nginx state=present
+
+    # - name: make sure postgresql is installed
+    #   apt: name=postgresql state=present
+    #   environment:
+    #     LC_ALL: en_US.UTF-8
+
+    # - name: make sure postgresql contrib extensions are installed
+    #   apt: name=postgresql-contrib state=present
