@@ -7,14 +7,26 @@
   become_user: root
   become_method: sudo
   tasks:
+    - name: add nodesource key to apt
+      apt_key:
+        url: 'https://deb.nodesource.com/gpgkey/nodesource.gpg.key'
+        state: present
+
     - name: make sure node ppa is available
-      apt_repository: repo='ppa:chris-lea/node.js'
+      apt_repository:
+        repo: 'deb https://deb.nodesource.com/node_4.x trusty main'
+        state: present
 
     - name: update apt-cache if needed
       apt: update_cache=yes
 
-    - name: make sure git is installed
-      apt: name=git state=present
+    - name: install apt packages
+      apt:
+        name: "{{item}}"
+        state: present
+      with_items:
+        - git
+        - nodejs
 
     - name: make sure nodejs is installed
       apt: name=nodejs state=present
