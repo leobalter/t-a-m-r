@@ -24,14 +24,33 @@
     - name: make sure the latest npm is installed
       command: npm install -g npm
 
-    - name: install npm's n
-      npm:
-        name: n
-        global: yes
+    # https://commondatastorage.googleapis.com/chrome-infra-docs/flat/depot_tools/docs/html/depot_tools_tutorial.html#_setting_up
+    - name: install Google's depot tools to fetch and sync v8
+      git:
+        repo=https://chromium.googlesource.com/chromium/tools/depot_tools.git
+        dest=/srv/depot_tools
 
-    # ppa:chris-lea installs Node 0.10.x
-    - name: use latest node version using n
-      command: n latest
+    - name: fetch v8
+      git:
+        repo=https://chromium.googlesource.com/v8/v8.git
+        dest=/srv/v8
+
+    - name: config gclient
+      command: /srv/depot_tools/gclient config "https://chromium.googlesource.com/v8/v8.git"
+      args:
+        chdir: /srv/v8/
+        creates: /srv/.gclient
+
+    # https://github.com/v8/v8/wiki/Building%20with%20Gyp#building-v8
+    - name: sync v8 folder
+      command: /srv/depot_tools/gclient sync
+      args:
+        chdir: /srv/v8/
+
+    - name: build v8 (Grab a coffee)
+      make:
+        chdir: /srv/v8/
+        target: native
 
     - name: install test262-harness globally
       npm:
