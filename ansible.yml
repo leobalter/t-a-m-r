@@ -31,24 +31,17 @@
     - name: make sure nodejs is installed
       apt: name=nodejs state=present
 
-    # use npm module when this issue is resolved:
-    # https://github.com/ansible/ansible-modules-extras/issues/137
-    - name: make sure the latest npm is installed
-      command: npm install -g npm
-
-    - name: install npm's n
+    - name: install npm packages
       npm:
-        name: n
+        name: "{{item}}"
         global: yes
+      with_items:
+        - npm
+        - n
+        - test262-harness
 
-    # ppa:chris-lea installs Node 0.10.x
     - name: use latest node version using n
       command: n latest
-
-    - name: install test262-harness globally
-      npm:
-        name: test262-harness
-        global: yes
 
     - name: test262 files
       git:
